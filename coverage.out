@@ -1,0 +1,11 @@
+mode: set
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:21.129,23.2 1 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:25.117,26.51 1 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:26.51,28.3 1 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:30.2,31.21 2 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:31.21,33.3 1 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:35.2,36.16 2 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:36.16,38.3 1 0
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:40.2,46.53 2 1
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:46.53,48.3 1 0
+github.com/azrilpramudia/go-clean-architecture/internal/usecase/user_usecase.go:50.2,59.8 2 1

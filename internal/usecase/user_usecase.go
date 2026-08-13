@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/azrilpramudia/go-clean-architecture/internal/entity"
+	"github.com/azrilpramudia/go-clean-architecture/internal/gateway"
 	"github.com/azrilpramudia/go-clean-architecture/internal/model"
 	"github.com/azrilpramudia/go-clean-architecture/internal/repository"
 	"github.com/go-playground/validator/v10"
@@ -13,11 +14,12 @@ import (
 
 type UserUsecase struct {
 	Repository repository.UserRespository
+	Gateway gateway.NotificationGateway
 	Validate *validator.Validate
 }
 
-func NewUserUsecase(repo repository.UserRespository, validate *validator.Validate) *UserUsecase {
-	return &UserUsecase{Repository: repo, Validate: validate }
+func NewUserUsecase(repo repository.UserRespository, gw gateway.NotificationGateway, validate *validator.Validate) *UserUsecase {
+	return &UserUsecase{Repository: repo, Gateway: gw, Validate: validate }
 }
 
 func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserRequest) (*model.UserRespone, error) {
@@ -27,7 +29,7 @@ func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserR
 	
 	existing, _ := u.Repository.FindByUsername(ctx, request.Username)
 	if existing != nil {
-		return nil, errors.New("Username already registered")
+		return nil, errors.New("username already registered")
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
@@ -44,6 +46,11 @@ func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserR
 	if err := u.Repository.Save(ctx, user); err != nil {
 		return nil, err
 	}
+
+	_ = u.Gateway.SendVerificationEmail(ctx, &model.SendVerificationEmailRequest{
+		Email: user.Username,
+		Code: "123456",
+	})
 
 	return &model.UserRespone{
 		ID: user.ID,

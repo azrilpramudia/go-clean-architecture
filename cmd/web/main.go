@@ -1,11 +1,13 @@
 package main
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/azrilpramudia/go-clean-architecture/internal/config"
 	deliveryhttp "github.com/azrilpramudia/go-clean-architecture/internal/delivery/http"
+	"github.com/azrilpramudia/go-clean-architecture/internal/gateway"
 	"github.com/azrilpramudia/go-clean-architecture/internal/repository"
 	"github.com/azrilpramudia/go-clean-architecture/internal/usecase"
 	"github.com/go-playground/validator/v10"
@@ -13,21 +15,21 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:MeowHX@01@tcp(localhost:3306)/myapp?parseTime=true")
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := config.Load("config.json")
+	db := config.NewDatabase(cfg)
 	defer db.Close()
 
 	validate := validator.New()
 
 	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository, validate)
+	NotificationGateway := gateway.NewNotificationGateway("https://api.emailprovider.com")
+	userUsecase := usecase.NewUserUsecase(userRepository, NotificationGateway, validate)
 	userHandler := deliveryhttp.NewUserHandler(userUsecase)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/users/register", userHandler.Register)
 
-	log.Println("server running on :3000")
-	log.Fatal(http.ListenAndServe(":3000", mux))
+	addr := fmt.Sprintf(":%d", cfg.Server.Port)
+	log.Printf("server running on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, mux))
 }
