@@ -30,7 +30,7 @@ func setupTestServer(t *testing.T) *httptest.Server {
 	gatewayMock.On("SendVerificationEmail", mock.Anything, mock.Anything).Return(nil)
 
 	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository, gatewayMock, validate)
+	userUsecase := usecase.NewUserUsecase(userRepository, gatewayMock, validate, "test-secret", 24)
 	userHandler := deliveryhttp.NewUserHandler(userUsecase)
 
 	mux := http.NewServeMux()
