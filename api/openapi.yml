@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: Go Clean Architecture API
+  version: 1.0.0
+  description: API for user management using clean architecture pattern
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /api/users/register:
+    post:
+      summary: Register a new user
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserRequest"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Validation failed or username already registered
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "username already registered"
+
+components:
+  schemas:
+    RegisterUserRequest:
+      type: object
+      required:
+        - username
+        - password
+        - name
+      properties:
+        username:
+          type: string
+          maxLength: 100
+          example: burhan
+        password:
+          type: string
+          maxLength: 100
+          example: rahasia123
+        name:
+          type: string
+          maxLength: 100
+          example: Burhan
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: burhan
+        name:
+          type: string
+          example: Burhan
