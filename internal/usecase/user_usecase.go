@@ -32,7 +32,7 @@ func NewUserUsecase(repo repository.UserRespository, gw gateway.NotificationGate
 	}
 }
 
-func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserRequest) (*model.UserRespone, error) {
+func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserRequest) (*model.UserResponse, error) {
 	if err := u.Validate.Struct(request); err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserR
 		Code: "123456",
 	})
 
-	return &model.UserRespone{
+	return &model.UserResponse{
 		ID: user.ID,
 		Username: user.Username,
 		Name: user.Name,
@@ -102,15 +102,15 @@ func (u *UserUsecase) Login(ctx context.Context, request *model.LoginUserRequest
 	return &model.TokenResponse{Token: signedToken}, nil
 }
 
-func (u *UserUsecase) List(ctx context.Context) ([]model.UserRespone, error) {
+func (u *UserUsecase) List(ctx context.Context) ([]model.UserResponse, error) {
 	users, err := u.Repository.FindAll(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]model.UserRespone, 0, len(users))
+	responses := make([]model.UserResponse, 0, len(users))
 	for _, user := range users {
-		responses = append(responses, model.UserRespone{
+		responses = append(responses, model.UserResponse{
 			ID: user.ID,
 			Username: user.Username,
 			Name: user.Name,
@@ -119,6 +119,17 @@ func (u *UserUsecase) List(ctx context.Context) ([]model.UserRespone, error) {
 	return responses, nil
 }
 	
+func (u *UserUsecase) Delete(ctx context.Context, id int64) error {
+	existing, err := u.Repository.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return errors.New("user not found")
+	}
+	
+	return u.Repository.Delete(ctx, id)
+}
 	
 
 	

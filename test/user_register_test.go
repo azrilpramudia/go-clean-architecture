@@ -37,6 +37,7 @@ func setupTestServer(t *testing.T) *httptest.Server {
 	mux.HandleFunc("POST /api/users/register", userHandler.Register)
 	mux.HandleFunc("POST /api/users/login", userHandler.Login)
 	mux.HandleFunc("GET /api/users", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.List))
+	mux.HandleFunc("DELETE /api/users/{id}", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.Delete))
 
 	server := httptest.NewServer(mux)
 	t.Cleanup(func() { server.Close() })
@@ -74,7 +75,7 @@ func TestIntegration_RegisterUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
-	var response model.UserRespone
+	var response model.UserResponse
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	assert.Nil(t, err)
 	assert.Equal(t, "integrationtest", response.Username)

@@ -8,7 +8,7 @@ type RegisterUserRequest struct {
 }
 
 // response to client
-type UserRespone struct {
+type UserResponse struct {
 	ID int64 `json:"id"`
 	Username string `json:"username"`
 	Name string `json:"name"`

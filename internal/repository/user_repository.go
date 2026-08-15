@@ -10,7 +10,9 @@ import (
 type UserRespository interface {
 	Save(ctx context.Context, user *entity.User) error
 	FindByUsername(ctx context.Context, username string) (*entity.User, error)
+	FindByID(ctx context.Context, id int64) (*entity.User, error)
 	FindAll(ctx context.Context) ([]entity.User, error)
+	Delete(ctx context.Context, id int64) error
 }
 
 type userRepositoryImpl struct {
@@ -47,6 +49,21 @@ func (r *userRepositoryImpl) FindByUsername(ctx context.Context, username string
 	return user, nil
 }
 
+func (r *userRepositoryImpl) FindByID(ctx context.Context, id int64) (*entity.User, error) {
+	query := "SELECT id, username, password, name FROM users WHERE id = ?"
+	row := r.DB.QueryRowContext(ctx, query, id)
+
+	user := new(entity.User)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}
+
 func (r *userRepositoryImpl) FindAll(ctx context.Context) ([]entity.User, error) {
 	query := "SELECT id, username, password, name FROM users"
 	rows, err := r.DB.QueryContext(ctx, query)
@@ -64,4 +81,22 @@ func (r *userRepositoryImpl) FindAll(ctx context.Context) ([]entity.User, error)
 		users = append(users, user)
 	}
 	return users, nil
+}
+
+func (r *userRepositoryImpl) Delete(ctx context.Context, id int64) error {
+	query := "DELETE FROM users WHERE id = ?"
+	result, err := r.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

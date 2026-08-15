@@ -92,6 +92,46 @@ paths:
                 type: string
                 example: "invalid or expired token"
 
+  /api/users/{id}:
+    delete:
+      summary: Delete a user by ID
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID to delete
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "204":
+          description: User deleted successfully (no content returned)
+        "400":
+          description: Invalid id parameter (not a valid integer)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "invalid id parameter"
+        "401":
+          description: Missing, invalid, or expired token
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "invalid or expired token"
+        "404":
+          description: User not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "user not found"
+
 components:
   securitySchemes:
     bearerAuth:

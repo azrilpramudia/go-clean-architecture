@@ -30,6 +30,7 @@ func main() {
 	mux.HandleFunc("POST /api/users/register", userHandler.Register)
 	mux.HandleFunc("POST /api/users/login", userHandler.Login)
 	mux.HandleFunc("GET /api/users", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.List))
+	mux.HandleFunc("DELETE /api/users/{id}", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.Delete))
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	log.Printf("server running on %s", addr)

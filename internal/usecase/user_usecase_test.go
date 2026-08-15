@@ -219,3 +219,38 @@ func TestLogin_ValidationFailed(t *testing.T) {
 	assert.NotNil(t, err)
 	repoMock.AssertNotCalled(t, "FindByUsername")
 }
+
+func TestDelete_Success(t *testing.T) {
+	repoMock := new(mocks.UserRepositoryMock)
+	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
+	validate := validator.New()
+	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+
+	existingUser := &entity.User{ID: 1, Username: "burhan", Name:"Burhan"}
+
+	repoMock.On("FindByID", context.Background(), int64(1)).
+		Return(existingUser, nil)
+	repoMock.On("Delete", context.Background(), int64(1)).
+		Return(nil)
+
+	err := UserUsecase.Delete(context.Background(), 1)
+
+	assert.Nil(t, err)
+	repoMock.AssertExpectations(t)
+}
+
+func TestDelete_UserNotFound(t *testing.T) {
+	repoMock := new(mocks.UserRepositoryMock)
+	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
+	validate := validator.New()
+	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+
+	repoMock.On("FindByID", context.Background(), int64(999)).
+		Return(nil, nil)
+
+		err := UserUsecase.Delete(context.Background(), 999)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, "user not found", err.Error())
+		repoMock.AssertNotCalled(t, "Delete")
+}

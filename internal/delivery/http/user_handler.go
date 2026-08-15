@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/azrilpramudia/go-clean-architecture/internal/model"
 	"github.com/azrilpramudia/go-clean-architecture/internal/usecase"
@@ -62,4 +63,20 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
+}
+
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	idParam := r.PathValue("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id parameter", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Usecase.Delete(r.Context(), id); err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

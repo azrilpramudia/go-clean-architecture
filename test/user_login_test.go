@@ -112,7 +112,7 @@ func TestIntegration_GetAllUsers_WithValidToken(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var users []model.UserRespone
+	var users []model.UserResponse
 	err = json.NewDecoder(resp.Body).Decode(&users)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, users)

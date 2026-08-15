@@ -24,12 +24,25 @@ func (m *UserRepositoryMock) FindByUsername(ctx context.Context, username string
 	return args.Get(0).(*entity.User), args.Error(1)
 }
 
+func (m *UserRepositoryMock) FindByID(ctx context.Context, id int64) (*entity.User, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entity.User), args.Error(1)
+}
+
 func (m *UserRepositoryMock) FindAll(ctx context.Context) ([]entity.User, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]entity.User), args.Error(1)
+}
+
+func (m *UserRepositoryMock) Delete(ctx context.Context, id int64) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
 }
 
 
