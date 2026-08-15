@@ -30,11 +30,13 @@ func setupTestServer(t *testing.T) *httptest.Server {
 	gatewayMock.On("SendVerificationEmail", mock.Anything, mock.Anything).Return(nil)
 
 	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository, gatewayMock, validate, "test-secret", 24)
+	userUsecase := usecase.NewUserUsecase(userRepository, gatewayMock, validate, cfg.JWT.Secret, cfg.JWT.ExpiryHours)
 	userHandler := deliveryhttp.NewUserHandler(userUsecase)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/users/register", userHandler.Register)
+	mux.HandleFunc("POST /api/users/login", userHandler.Login)
+	mux.HandleFunc("GET /api/users", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.List))
 
 	server := httptest.NewServer(mux)
 	t.Cleanup(func() { server.Close() })
