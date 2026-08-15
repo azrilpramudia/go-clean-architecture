@@ -10,6 +10,7 @@ import (
 type UserRespository interface {
 	Save(ctx context.Context, user *entity.User) error
 	FindByUsername(ctx context.Context, username string) (*entity.User, error)
+	FindAll(ctx context.Context) ([]entity.User, error)
 }
 
 type userRepositoryImpl struct {
@@ -44,4 +45,23 @@ func (r *userRepositoryImpl) FindByUsername(ctx context.Context, username string
 		return nil, err
 	}
 	return user, nil
+}
+
+func (r *userRepositoryImpl) FindAll(ctx context.Context) ([]entity.User, error) {
+	query := "SELECT id, username, password, name FROM users"
+	rows, err := r.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []entity.User
+	for rows.Next() {
+		user := entity.User{}
+		if err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Name); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }

@@ -20,14 +20,16 @@ func main() {
 	defer db.Close()
 
 	validate := validator.New()
+	NotificationGateway := gateway.NewNotificationGateway("https://api.emailprovider.com")
 
 	userRepository := repository.NewUserRepository(db)
-	NotificationGateway := gateway.NewNotificationGateway("https://api.emailprovider.com")
-	userUsecase := usecase.NewUserUsecase(userRepository, NotificationGateway, validate)
+	userUsecase := usecase.NewUserUsecase(userRepository, NotificationGateway, validate, cfg.JWT.Secret, cfg.JWT.ExpiryHours)
 	userHandler := deliveryhttp.NewUserHandler(userUsecase)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/users/register", userHandler.Register)
+	mux.HandleFunc("POST /api/users/login", userHandler.Login)
+	mux.HandleFunc("GET /api/users", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.List))
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	log.Printf("server running on %s", addr)

@@ -35,7 +35,73 @@ paths:
                 type: string
                 example: "username already registered"
 
+  /api/users/login:
+    post:
+      summary: Login and obtain a JWT token
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginUserRequest"
+      responses:
+        "200":
+          description: Login successful, returns JWT token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Validation failed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Key: 'LoginUserRequest.Username' Error:Field validation for 'Username' failed on the 'required' tag"
+        "401":
+          description: Username or password is wrong
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "username or password is wrong"
+
+  /api/users:
+    get:
+      summary: Get list of all users
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Missing, invalid, or expired token
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "invalid or expired token"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Send the JWT token obtained from /api/users/login in the format:
+        `Authorization: Bearer <token>`
+
   schemas:
     RegisterUserRequest:
       type: object
@@ -56,6 +122,28 @@ components:
           type: string
           maxLength: 100
           example: Burhan
+
+    LoginUserRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          maxLength: 100
+          example: burhan
+        password:
+          type: string
+          maxLength: 100
+          example: rahasia123
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiYXpyaWwifQ.signature"
 
     UserResponse:
       type: object

@@ -8,5 +8,9 @@
   },
   "server": {
     "port": 3000
+  },
+  "jwt": {
+    "secret": "ehrkjhwoiehr09384931u5oihnsdjvnsDKJNfewhoiru32094u329t5hgdskjgkjh131243tegst43643tdsvszhsretw5437431",
+    "expiry_hours": 24
   }
 }

@@ -21,6 +21,10 @@ type AppConfig struct {
 	Server struct {
 		Port int `json:"port"`
 	} `json:"server"`
+	JWT struct {
+		Secret string `json:"secret"`
+		ExpiryHours int `json:"expiry_hours"`
+	} `json:"jwt"`
 }
 
 func Load(path string) *AppConfig {

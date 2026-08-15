@@ -13,3 +13,12 @@ type UserRespone struct {
 	Username string `json:"username"`
 	Name string `json:"name"`
 }
+
+type LoginUserRequest struct {
+	Username string `json:"Username" validate:"required,max=100"`
+	Password string `json:"password" validate:"required,max=100"`
+}
+
+type TokenResponse struct {
+	Token string `json:"token"`
+}

@@ -8,5 +8,9 @@
   },
   "server": {
     "port": 3000
+  },
+  "jwt": {
+    "secret": "your secret string",
+    "expiry_hours": 24
   }
 }
