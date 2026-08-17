@@ -156,11 +156,3 @@ func (u *UserUsecase) Delete(ctx context.Context, id int64) error {
 	
 	return u.Repository.Delete(ctx, id)
 }
-	
-
-	
-
-
-	
-
-	
