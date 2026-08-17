@@ -120,6 +120,30 @@ func (u *UserUsecase) List(ctx context.Context) ([]model.UserResponse, error) {
 	}
 	return responses, nil
 }
+
+func (u *UserUsecase) Update(ctx context.Context, id int64, request *model.UpdateUserRequest) (*model.UserResponse, error) {
+	if err := u.Validate.Struct(request); err != nil {
+		return nil, err
+	}
+
+	existing, err := u.Repository.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, ErrUserNotFound
+	}
+
+	if err := u.Repository.Update(ctx, id, request.Name); err != nil {
+		return nil, err
+	}
+
+	return &model.UserResponse{
+		ID: existing.ID,
+		Username: existing.Username,
+		Name: request.Name,
+	}, nil
+}
 	
 func (u *UserUsecase) Delete(ctx context.Context, id int64) error {
 	existing, err := u.Repository.FindByID(ctx, id)

@@ -19,6 +19,10 @@ type LoginUserRequest struct {
 	Password string `json:"password" validate:"required,max=100"`
 }
 
+type UpdateUserRequest struct {
+	Name string `json:"name" validate:"required,max=100"`
+}
+
 type TokenResponse struct {
 	Token string `json:"token"`
 }

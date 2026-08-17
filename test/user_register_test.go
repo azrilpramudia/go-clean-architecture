@@ -41,6 +41,7 @@ func setupTestServer(t *testing.T) *httptest.Server {
 	mux.HandleFunc("POST /api/users/login", userHandler.Login)
 	mux.HandleFunc("GET /api/users", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.List))
 	mux.HandleFunc("DELETE /api/users/{id}", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.Delete))
+	mux.HandleFunc("PATCH /api/users/{id}", deliveryhttp.AuthMiddleware(cfg.JWT.Secret, userHandler.Update))
 
 	server := httptest.NewServer(mux)
 	t.Cleanup(func() { server.Close() })

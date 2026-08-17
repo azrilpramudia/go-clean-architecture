@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/azrilpramudia/go-clean-architecture/internal/entity"
 )
@@ -12,6 +13,7 @@ type UserRepository interface {
 	FindByUsername(ctx context.Context, username string) (*entity.User, error)
 	FindByID(ctx context.Context, id int64) (*entity.User, error)
 	FindAll(ctx context.Context) ([]entity.User, error)
+	Update(ctx context.Context, id int64, name string) error
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -88,6 +90,24 @@ func (r *userRepositoryImpl) FindAll(ctx context.Context) ([]entity.User, error)
 	}
 
 	return users, nil
+}
+
+func (r *userRepositoryImpl) Update(ctx context.Context, id int64, name string) error {
+	query := "UPDATE users SET name = ?, updated_at = ? WHERE id = ?"
+	result, err := r.DB.ExecContext(ctx, query, name, time.Now(), id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }
 
 func (r *userRepositoryImpl) Delete(ctx context.Context, id int64) error {

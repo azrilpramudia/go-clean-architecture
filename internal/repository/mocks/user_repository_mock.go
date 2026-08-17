@@ -40,6 +40,12 @@ func (m *UserRepositoryMock) FindAll(ctx context.Context) ([]entity.User, error)
 	return args.Get(0).([]entity.User), args.Error(1)
 }
 
+func (m *UserRepositoryMock) Update(ctx context.Context, id int64, name string) error {
+	args := m.Called(ctx, id, name)
+	return args.Error(0)
+}
+
+
 func (m *UserRepositoryMock) Delete(ctx context.Context, id int64) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
