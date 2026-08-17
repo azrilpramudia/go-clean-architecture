@@ -44,6 +44,9 @@ func (r *userRepositoryImpl) FindByUsername(ctx context.Context, username string
 	user := new(entity.User)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Name)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return user, nil

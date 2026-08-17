@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/azrilpramudia/go-clean-architecture/internal/entity"
@@ -37,9 +36,12 @@ func (u *UserUsecase) Register(ctx context.Context, request *model.RegisterUserR
 		return nil, err
 	}
 
-	existing, _ := u.Repository.FindByUsername(ctx, request.Username)
+	existing, err := u.Repository.FindByUsername(ctx, request.Username)
+	if err != nil {
+		return nil, err
+	}
 	if existing != nil {
-		return nil, errors.New("username already registered")
+		return nil, ErrUsernameAlreadyExists
 	}
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
@@ -80,11 +82,11 @@ func (u *UserUsecase) Login(ctx context.Context, request *model.LoginUserRequest
 	}
 
 	if user == nil {
-		return nil, errors.New("username or password is wrong")
+		return nil, ErrInvalidCredentials
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
-		return nil, errors.New("username or password is wrong")
+		return nil, ErrInvalidCredentials
 	}
 
 	claims := jwt.MapClaims{
@@ -125,7 +127,7 @@ func (u *UserUsecase) Delete(ctx context.Context, id int64) error {
 		return err
 	}
 	if existing == nil {
-		return errors.New("user not found")
+		return ErrUserNotFound
 	}
 	
 	return u.Repository.Delete(ctx, id)
