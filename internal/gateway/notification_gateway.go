@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/azrilpramudia/go-clean-architecture/internal/model"
 )
@@ -14,19 +15,21 @@ type NotificationGateway interface {
 	SendVerificationEmail(ctx context.Context, request *model.SendVerificationEmailRequest) error
 }
 
-type NotificationGatewayImpl struct {
+type notificationGatewayImpl struct {
 	BaseURL string
 	Client *http.Client
 }
 
 func NewNotificationGateway(baseURL string) NotificationGateway {
-	return &NotificationGatewayImpl{
+	return &notificationGatewayImpl{
 		BaseURL: baseURL,
-		Client: &http.Client{},
+		Client: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 	}
 }
 
-func (g *NotificationGatewayImpl) SendVerificationEmail(ctx context.Context, request *model.SendVerificationEmailRequest) error {
+func (g *notificationGatewayImpl) SendVerificationEmail(ctx context.Context, request *model.SendVerificationEmailRequest) error {
 	payload, err := json.Marshal(request)
 	if err != nil {
 		return err
@@ -46,7 +49,7 @@ func (g *NotificationGatewayImpl) SendVerificationEmail(ctx context.Context, req
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("failed to send varification email, status: %d", resp.StatusCode)
+		return fmt.Errorf("failed to send verification email, status: %d", resp.StatusCode)
 	}
 
 	return nil

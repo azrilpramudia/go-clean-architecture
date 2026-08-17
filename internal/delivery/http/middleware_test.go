@@ -142,6 +142,32 @@ func TestAuthMiddleware_WrongSecret(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 }
 
+func TestAuthMiddleware_WrongAlgorithm(t *testing.T) {
+	nextCalled := false
+	dummyHandler := func(w http.ResponseWriter, r *http.Request) {
+		nextCalled = true
+	}
+
+	handler := deliveryhttp.AuthMiddleware(testSecret, dummyHandler)
+
+	claims := jwt.MapClaims{
+		"sub": 1,
+		"exp": time.Now().Add(1 * time.Hour).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodNone, claims)
+	signed, err := token.SignedString(jwt.UnsafeAllowNoneSignatureType)
+	assert.Nil(t, err)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/users", nil)
+	req.Header.Set("Authorization", "Bearer "+signed)
+	recorder := httptest.NewRecorder()
+
+	handler(recorder, req)
+
+	assert.False(t, nextCalled, "next handler tidak boleh terpanggil kalau algoritma tidak sesusai")
+	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
+}
+
 func TestAuthMiddleware_ExpiredToken(t *testing.T) {
 	nextCalled := false
 	dummyHandler := func(w http.ResponseWriter, r *http.Request) {

@@ -1,16 +1,19 @@
 {
-  "databse": {
+  "database": {
     "host": "localhost",
     "port": 3306,
     "user": "root",
-    "password": "your_password",
-    "name": "your_db"
+    "password": "your_password_here",
+    "name": "myapp"
   },
   "server": {
     "port": 3000
   },
   "jwt": {
-    "secret": "your secret string",
+    "secret": "your_jwt_secret_here",
     "expiry_hours": 24
+  },
+  "notification": {
+    "base_url": "https://api.emailservice.com"
   }
 }

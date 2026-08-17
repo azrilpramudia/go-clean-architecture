@@ -14,14 +14,14 @@ import (
 )
 
 type UserUsecase struct {
-	Repository repository.UserRespository
+	Repository repository.UserRepository
 	Gateway gateway.NotificationGateway
 	Validate *validator.Validate
 	JWTSecret string
 	JWTExpiry int
 }
 
-func NewUserUsecase(repo repository.UserRespository, gw gateway.NotificationGateway, validate *validator.Validate, jwtSecret string, jwtExpiry int) *UserUsecase {
+func NewUserUsecase(repo repository.UserRepository, gw gateway.NotificationGateway, validate *validator.Validate, jwtSecret string, jwtExpiry int) *UserUsecase {
 	return &UserUsecase{
 		Repository: repo, 
 		Gateway: gw, 

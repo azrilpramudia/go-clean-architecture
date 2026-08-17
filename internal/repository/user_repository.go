@@ -7,7 +7,7 @@ import (
 	"github.com/azrilpramudia/go-clean-architecture/internal/entity"
 )
 
-type UserRespository interface {
+type UserRepository interface {
 	Save(ctx context.Context, user *entity.User) error
 	FindByUsername(ctx context.Context, username string) (*entity.User, error)
 	FindByID(ctx context.Context, id int64) (*entity.User, error)
@@ -19,7 +19,7 @@ type userRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) UserRespository {
+func NewUserRepository(db *sql.DB) UserRepository {
 	return &userRepositoryImpl{DB: db}
 }
 
@@ -83,6 +83,10 @@ func (r *userRepositoryImpl) FindAll(ctx context.Context) ([]entity.User, error)
 		}
 		users = append(users, user)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }
 

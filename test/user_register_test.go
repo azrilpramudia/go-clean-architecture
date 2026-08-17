@@ -20,7 +20,10 @@ import (
 )
 
 func setupTestServer(t *testing.T) *httptest.Server {
-	cfg := config.Load("../config.json")
+	cfg, err := config.Load("../config.json")
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
 	db := config.NewDatabase(cfg)
 	t.Cleanup(func() {db.Close() })
 
@@ -46,11 +49,14 @@ func setupTestServer(t *testing.T) *httptest.Server {
 }
 
 func cleanupUser(t *testing.T, username string) {
-	cfg := config.Load("../config.json")
+	cfg, err := config.Load("../config.json")
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
 	db := config.NewDatabase(cfg)
 	defer db.Close()
 
-	_, err := db.ExecContext(context.Background(), "DELETE FROM users WHERE username = ?", username)
+	_, err = db.ExecContext(context.Background(), "DELETE FROM users WHERE username = ?", username)
 	if err != nil {
 		t.Fatalf("failed to cleanup test user: %v", err)
 	}

@@ -15,15 +15,18 @@ import (
 )
 
 func main() {
-	cfg := config.Load("config.json")
+	cfg, err := config.Load("config.json")
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
 	db := config.NewDatabase(cfg)
 	defer db.Close()
 
 	validate := validator.New()
-	NotificationGateway := gateway.NewNotificationGateway("https://api.emailprovider.com")
+	notificationGateway := gateway.NewNotificationGateway(cfg.Notification.BaseURL)
 
 	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository, NotificationGateway, validate, cfg.JWT.Secret, cfg.JWT.ExpiryHours)
+	userUsecase := usecase.NewUserUsecase(userRepository, notificationGateway, validate, cfg.JWT.Secret, cfg.JWT.ExpiryHours)
 	userHandler := deliveryhttp.NewUserHandler(userUsecase)
 
 	mux := http.NewServeMux()

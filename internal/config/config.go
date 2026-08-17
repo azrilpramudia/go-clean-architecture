@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -25,20 +26,23 @@ type AppConfig struct {
 		Secret string `json:"secret"`
 		ExpiryHours int `json:"expiry_hours"`
 	} `json:"jwt"`
+	Notification struct {
+		BaseURL string `json:"base_url"`
+	} `json:"notification"`
 }
 
-func Load(path string) *AppConfig {
+func Load(path string) (*AppConfig, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatalf("failed to open config file: %v", err)
+		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
 	defer file.Close()
 
 	cfg := new(AppConfig)
 	if err := json.NewDecoder(file).Decode(cfg); err != nil {
-		log.Fatalf("failed to parse config file: %v", err)
+		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
-	return cfg
+	return cfg, nil
 }
 
 func NewDatabase(cfg *AppConfig) *sql.DB {
@@ -50,6 +54,11 @@ func NewDatabase(cfg *AppConfig) *sql.DB {
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
+
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxIdleTime(5 * time.Minute)
+	db.SetConnMaxLifetime(2 * time.Minute)
 
 	if err := db.Ping(); err != nil {
 		log.Fatalf("failed to ping database: %v", err)
