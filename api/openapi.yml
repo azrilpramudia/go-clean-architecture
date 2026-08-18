@@ -93,6 +93,54 @@ paths:
                 example: "invalid or expired token"
 
   /api/users/{id}:
+    patch:
+      summary: Update a user's name by ID
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID to update
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Validation failed or invalid id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "invalid id parameter"
+        "401":
+          description: Missing, invalid, or expired token
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "invalid or expired token"
+        "404":
+          description: User not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "user not found"
     delete:
       summary: Delete a user by ID
       tags:
@@ -197,3 +245,13 @@ components:
         name:
           type: string
           example: Burhan
+
+    UpdateUserRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: "Nama Baru"

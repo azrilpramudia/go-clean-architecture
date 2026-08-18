@@ -45,7 +45,6 @@ func (m *UserRepositoryMock) Update(ctx context.Context, id int64, name string) 
 	return args.Error(0)
 }
 
-
 func (m *UserRepositoryMock) Delete(ctx context.Context, id int64) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)

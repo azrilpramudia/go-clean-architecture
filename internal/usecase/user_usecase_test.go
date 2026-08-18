@@ -50,7 +50,7 @@ func TestRegister_UsernameAlreadyExists(t *testing.T) {
 	repoMock := new(mocks.UserRepositoryMock)
 	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
 	validate := validator.New()
-	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
 
 	request := &model.RegisterUserRequest{
 		Username: "burhan",
@@ -62,7 +62,7 @@ func TestRegister_UsernameAlreadyExists(t *testing.T) {
 	repoMock.On("FindByUsername", context.Background(), "burhan").
 		Return(existingUser, nil)
 
-	response, err := UserUsecase.Register(context.Background(), request)
+	response, err := userUsecase.Register(context.Background(), request)
 
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
@@ -192,11 +192,11 @@ func TestRegister_ValidationFailed(t *testing.T) {
 	repoMock := new(mocks.UserRepositoryMock)
 	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
 	validate := validator.New()
-	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
 
 	request := &model.RegisterUserRequest{}
 
-	response, err := UserUsecase.Register(context.Background(), request)
+	response, err := userUsecase.Register(context.Background(), request)
 
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
@@ -209,22 +209,87 @@ func TestLogin_ValidationFailed(t *testing.T) {
 	repoMock := new(mocks.UserRepositoryMock)
 	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
 	validate := validator.New()
-	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
 
 	request := &model.LoginUserRequest{}
 
-	response, err := UserUsecase.Login(context.Background(), request)
+	response, err := userUsecase.Login(context.Background(), request)
 
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	repoMock.AssertNotCalled(t, "FindByUsername")
 }
 
+// Test Update Success
+func TestUpdate_Success(t *testing.T) {
+	repoMock := new(mocks.UserRepositoryMock)
+	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
+	validate := validator.New()
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+
+	existingUser := &entity.User{ID: 3, Username: "test123", Name:"Nama Lama"}
+
+	request := &model.UpdateUserRequest{
+		Name : "Nama Baru",
+	}
+
+	repoMock.On("FindByID", context.Background(), int64(3)).
+		Return(existingUser, nil)
+	repoMock.On("Update", context.Background(), int64(3), "Nama Baru").
+		Return(nil)
+
+		response, err := userUsecase.Update(context.Background(), 3, request)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, response)
+		assert.Equal(t, "Nama Baru", response.Name)
+		assert.Equal(t, "test123", response.Username)
+		repoMock.AssertExpectations(t)
+}
+
+func TestUpdate_UserNotFound(t *testing.T) {
+	repoMock := new(mocks.UserRepositoryMock)
+	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
+	validate := validator.New()
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+
+	request := &model.UpdateUserRequest{
+		Name: "Nama Baru",
+	}
+
+	repoMock.On("FindByID", context.Background(), int64(999)).
+		Return(nil, nil)
+
+	response, err := userUsecase.Update(context.Background(), 999, request)
+
+	assert.Nil(t, response)
+	assert.NotNil(t, err)
+	assert.Equal(t, "user not found", err.Error())
+	repoMock.AssertNotCalled(t, "Update")
+}
+
+// Test Update Validation Failed
+func TestUpdate_ValidationFailed(t *testing.T) {
+	repoMock := new(mocks.UserRepositoryMock)
+	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
+	validate := validator.New()
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+
+	request := &model.UpdateUserRequest{}
+
+	response, err := userUsecase.Update(context.Background(), 3, request)
+
+	assert.Nil(t, response)
+	assert.NotNil(t, err)
+	repoMock.AssertNotCalled(t, "FindByID")
+	repoMock.AssertNotCalled(t, "Update")
+}
+
 func TestDelete_Success(t *testing.T) {
 	repoMock := new(mocks.UserRepositoryMock)
 	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
 	validate := validator.New()
-	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
 
 	existingUser := &entity.User{ID: 1, Username: "burhan", Name:"Burhan"}
 
@@ -233,7 +298,7 @@ func TestDelete_Success(t *testing.T) {
 	repoMock.On("Delete", context.Background(), int64(1)).
 		Return(nil)
 
-	err := UserUsecase.Delete(context.Background(), 1)
+	err := userUsecase.Delete(context.Background(), 1)
 
 	assert.Nil(t, err)
 	repoMock.AssertExpectations(t)
@@ -243,12 +308,12 @@ func TestDelete_UserNotFound(t *testing.T) {
 	repoMock := new(mocks.UserRepositoryMock)
 	gatewayMock := new(gatewaymocks.NotificationGatewayMock)
 	validate := validator.New()
-	UserUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
+	userUsecase := usecase.NewUserUsecase(repoMock, gatewayMock ,validate, "test-secret", 24)
 
 	repoMock.On("FindByID", context.Background(), int64(999)).
 		Return(nil, nil)
 
-		err := UserUsecase.Delete(context.Background(), 999)
+		err := userUsecase.Delete(context.Background(), 999)
 
 		assert.NotNil(t, err)
 		assert.Equal(t, "user not found", err.Error())
